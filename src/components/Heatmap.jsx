@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { RotateCcw } from 'lucide-react'
-import { SectionLabel } from './ui.jsx'
+import { SectionLabel, Button } from './ui.jsx'
 import { addDays, parseKey, shortDate, toKey } from '../lib/date.js'
 
 const WEEKS = 12
@@ -11,18 +11,17 @@ const cellColor = (lvl) =>
 
 const ROW_LABELS = ['T2', '', 'T4', '', 'T6', '', 'CN']
 
-export default function Heatmap({ habitLog, tasks, today, onReset }) {
+export default function Heatmap({ habits, habitLog, tasks, today, onReset }) {
   const [confirming, setConfirming] = useState(false)
 
-  useEffect(() => {
-    if (!confirming) return
-    const t = setTimeout(() => setConfirming(false), 3000)
-    return () => clearTimeout(t)
-  }, [confirming])
-
   const { days, total, activeDays } = useMemo(() => {
+    // chỉ đếm habit còn tồn tại: xoá habit thì lịch sử của nó cũng rời khỏi heatmap
+    const alive = new Set(habits.map((h) => h.id))
     const counts = {}
-    Object.entries(habitLog).forEach(([k, ids]) => (counts[k] = (counts[k] || 0) + ids.length))
+    Object.entries(habitLog).forEach(([k, ids]) => {
+      const n = ids.filter((id) => alive.has(id)).length
+      if (n) counts[k] = (counts[k] || 0) + n
+    })
     tasks.forEach((t) => t.done && t.doneAt && (counts[t.doneAt] = (counts[t.doneAt] || 0) + 1))
 
     const t = parseKey(today)
@@ -41,7 +40,7 @@ export default function Heatmap({ habitLog, tasks, today, onReset }) {
       return { key, n, future }
     })
     return { days, total, activeDays }
-  }, [habitLog, tasks, today])
+  }, [habits, habitLog, tasks, today])
 
   return (
     <section aria-labelledby="heat-h" className="px-4 py-4">
@@ -51,24 +50,45 @@ export default function Heatmap({ habitLog, tasks, today, onReset }) {
             <span className="num text-[11px] text-subtle">{WEEKS} tuần</span>
             <button
               type="button"
-              onClick={() => {
-                if (!confirming) return setConfirming(true)
-                onReset()
-                setConfirming(false)
-              }}
-              title={confirming ? 'Bấm lần nữa để xoá' : 'Xoá lịch sử trước hôm nay (streak sẽ tính lại từ đầu)'}
+              onClick={() => setConfirming(true)}
+              aria-expanded={confirming}
+              title="Xoá lịch sử trước hôm nay"
               className={`inline-flex h-6 items-center gap-1 rounded px-1.5 text-[11px] transition-colors duration-150 hover:bg-hover ${
-                confirming ? 'font-medium text-accent' : 'text-subtle hover:text-fg'
+                confirming ? 'text-fg' : 'text-subtle hover:text-fg'
               }`}
             >
               <RotateCcw size={12} strokeWidth={1.5} />
-              {confirming ? 'Xoá lịch sử?' : 'Đặt lại'}
+              Đặt lại
             </button>
           </span>
         }
       >
         <span id="heat-h">Hoạt động</span>
       </SectionLabel>
+
+      {confirming && (
+        <div role="alertdialog" aria-label="Xác nhận xoá lịch sử" className="mt-3 border-l-2 border-accent bg-bg py-2 pr-2 pl-3">
+          <p className="text-[12px] leading-snug">
+            Xoá toàn bộ lịch sử trước hôm nay?{' '}
+            <span className="text-muted">Streak của mọi thói quen sẽ về 0. Không hoàn tác được.</span>
+          </p>
+          <div className="mt-2 flex gap-2">
+            <Button
+              variant="primary"
+              className="h-7 px-2.5 text-[12px]"
+              onClick={() => {
+                onReset()
+                setConfirming(false)
+              }}
+            >
+              Xoá lịch sử
+            </Button>
+            <Button className="h-7 px-2.5 text-[12px]" onClick={() => setConfirming(false)}>
+              Huỷ
+            </Button>
+          </div>
+        </div>
+      )}
 
       <div className="mt-3 flex gap-2">
         <div className="grid grid-rows-7 gap-[3px] font-mono text-[9px] leading-none text-subtle" aria-hidden>

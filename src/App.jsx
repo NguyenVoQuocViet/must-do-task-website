@@ -412,7 +412,7 @@ export default function App() {
             sessionsToday={data.pomodoros[today] || 0}
             onComplete={onPomodoroComplete}
           />
-          <Heatmap habitLog={data.habitLog} tasks={data.tasks} today={today} onReset={resetActivity} />
+          <Heatmap habits={data.habits} habitLog={data.habitLog} tasks={data.tasks} today={today} onReset={resetActivity} />
           <Scratchpad value={data.scratch} onChange={setScratch} />
         </aside>
       </div>
