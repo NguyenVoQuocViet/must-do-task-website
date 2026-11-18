@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ChevronRight, Crosshair, Pencil, Plus, Search, Trash2, X } from 'lucide-react'
+import { ChevronRight, Crosshair, Flag, Pencil, Plus, Search, Trash2, X } from 'lucide-react'
 import { SectionLabel, IconButton, Button, Checkbox } from './ui.jsx'
 import { deadlineInfo } from '../lib/date.js'
 
@@ -63,7 +63,7 @@ function TaskFields({ draft, setDraft, tags, inputRef, placeholder }) {
   )
 }
 
-function TaskRow({ task, tags, today, focused, onToggle, onUpdate, onDelete, onFocus }) {
+function TaskRow({ task, tags, today, focused, onToggle, onUpdate, onDelete, onFocus, onTogglePriority }) {
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(task)
   const [confirmDelete, setConfirmDelete] = useState(false)
@@ -126,6 +126,16 @@ function TaskRow({ task, tags, today, focused, onToggle, onUpdate, onDelete, onF
       </span>
       <div className="flex shrink-0 items-center opacity-100 transition-opacity duration-150 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-within:opacity-100">
         {!task.done && (
+          <IconButton
+            label={task.priority === 'P1' ? 'Bỏ khỏi ưu tiên cao' : 'Đưa vào ưu tiên cao'}
+            onClick={() => onTogglePriority(task.id)}
+            active={task.priority === 'P1'}
+            aria-pressed={task.priority === 'P1'}
+          >
+            <Flag size={14} strokeWidth={1.5} fill={task.priority === 'P1' ? 'currentColor' : 'none'} />
+          </IconButton>
+        )}
+        {!task.done && (
           <IconButton label="Tập trung vào task này" onClick={() => onFocus(task.id)} active={focused}>
             <Crosshair size={14} strokeWidth={1.5} />
           </IconButton>
@@ -166,6 +176,7 @@ export default function Tasks({
   onUpdate,
   onDelete,
   onFocus,
+  onTogglePriority,
   addRef,
   searchRef,
 }) {
@@ -187,7 +198,7 @@ export default function Tasks({
   const open = tasks.filter((t) => !t.done)
   const done = tasks.filter((t) => t.done)
   const pct = progress.total ? Math.round((progress.done / progress.total) * 100) : 0
-  const rowProps = { tags, today, onToggle, onUpdate, onDelete, onFocus }
+  const rowProps = { tags, today, onToggle, onUpdate, onDelete, onFocus, onTogglePriority }
 
   return (
     <section aria-labelledby="tasks-h" className="flex flex-col">

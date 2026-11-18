@@ -1,4 +1,5 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { RotateCcw } from 'lucide-react'
 import { SectionLabel } from './ui.jsx'
 import { addDays, parseKey, shortDate, toKey } from '../lib/date.js'
 
@@ -10,7 +11,15 @@ const cellColor = (lvl) =>
 
 const ROW_LABELS = ['T2', '', 'T4', '', 'T6', '', 'CN']
 
-export default function Heatmap({ habitLog, tasks, today }) {
+export default function Heatmap({ habitLog, tasks, today, onReset }) {
+  const [confirming, setConfirming] = useState(false)
+
+  useEffect(() => {
+    if (!confirming) return
+    const t = setTimeout(() => setConfirming(false), 3000)
+    return () => clearTimeout(t)
+  }, [confirming])
+
   const { days, total, activeDays } = useMemo(() => {
     const counts = {}
     Object.entries(habitLog).forEach(([k, ids]) => (counts[k] = (counts[k] || 0) + ids.length))
@@ -36,7 +45,28 @@ export default function Heatmap({ habitLog, tasks, today }) {
 
   return (
     <section aria-labelledby="heat-h" className="px-4 py-4">
-      <SectionLabel right={<span className="num text-[11px] text-subtle">{WEEKS} tuần</span>}>
+      <SectionLabel
+        right={
+          <span className="flex items-center gap-2">
+            <span className="num text-[11px] text-subtle">{WEEKS} tuần</span>
+            <button
+              type="button"
+              onClick={() => {
+                if (!confirming) return setConfirming(true)
+                onReset()
+                setConfirming(false)
+              }}
+              title={confirming ? 'Bấm lần nữa để xoá' : 'Xoá lịch sử trước hôm nay (streak sẽ tính lại từ đầu)'}
+              className={`inline-flex h-6 items-center gap-1 rounded px-1.5 text-[11px] transition-colors duration-150 hover:bg-hover ${
+                confirming ? 'font-medium text-accent' : 'text-subtle hover:text-fg'
+              }`}
+            >
+              <RotateCcw size={12} strokeWidth={1.5} />
+              {confirming ? 'Xoá lịch sử?' : 'Đặt lại'}
+            </button>
+          </span>
+        }
+      >
         <span id="heat-h">Hoạt động</span>
       </SectionLabel>
 

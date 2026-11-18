@@ -129,6 +129,28 @@ export default function App() {
       focusTaskId: d.focusTaskId === id ? null : d.focusTaskId,
     }))
   const setFocus = (id) => setData((d) => ({ ...d, focusTaskId: id }))
+  // Bật/tắt P1; khi bỏ P1 thì trả về mức ưu tiên trước đó (mặc định P2)
+  const togglePriority = (id) =>
+    setData((d) => ({
+      ...d,
+      tasks: d.tasks.map((t) => {
+        if (t.id !== id) return t
+        if (t.priority === 'P1') {
+          const { prevPriority, ...rest } = t
+          return { ...rest, priority: prevPriority && prevPriority !== 'P1' ? prevPriority : 'P2' }
+        }
+        return { ...t, priority: 'P1', prevPriority: t.priority }
+      }),
+    }))
+  // Xoá lịch sử hoạt động trước hôm nay; giữ nguyên tick của hôm nay
+  const resetActivity = () => {
+    setData((d) => ({
+      ...d,
+      habitLog: d.habitLog[today] ? { [today]: d.habitLog[today] } : {},
+      tasks: d.tasks.map((t) => (t.done && t.doneAt && t.doneAt < today ? { ...t, doneAt: null } : t)),
+    }))
+    setNotice({ tone: 'ok', text: 'Đã xoá lịch sử hoạt động. Streak tính lại từ hôm nay.' })
+  }
   const addTag = (name) => setData((d) => (d.tags.includes(name) ? d : { ...d, tags: [...d.tags, name] }))
   const setScratch = useCallback((scratch) => setData((d) => ({ ...d, scratch })), [])
   const onPomodoroComplete = useCallback(
@@ -375,6 +397,7 @@ export default function App() {
               onUpdate={updateTask}
               onDelete={deleteTask}
               onFocus={setFocus}
+              onTogglePriority={togglePriority}
               addRef={addRef}
               searchRef={searchRef}
             />
@@ -389,7 +412,7 @@ export default function App() {
             sessionsToday={data.pomodoros[today] || 0}
             onComplete={onPomodoroComplete}
           />
-          <Heatmap habitLog={data.habitLog} tasks={data.tasks} today={today} />
+          <Heatmap habitLog={data.habitLog} tasks={data.tasks} today={today} onReset={resetActivity} />
           <Scratchpad value={data.scratch} onChange={setScratch} />
         </aside>
       </div>
