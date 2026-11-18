@@ -1,0 +1,22 @@
+node_modules
+dist
+.npm-cache
+*.log
+
+exports/*.json
+
+# cấu hình chỉ dùng trên máy này
+.npmrc
+.claude/settings.local.json
+
+# môi trường & editor
+.env
+.env.*
+*.local
+.vscode/
+.idea/
+
+# file rác của hệ điều hành
+Thumbs.db
+Desktop.ini
+.DS_Store

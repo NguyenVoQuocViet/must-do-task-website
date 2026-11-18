@@ -1,0 +1,132 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-hover: var(--hover);
+  --color-fg: var(--text);
+  --color-muted: var(--text-muted);
+  --color-subtle: var(--text-subtle);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-done: var(--done);
+  --font-sans: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+:root,
+:root[data-theme="dark"] {
+  --bg: #0d0e11;
+  --surface: #14161b;
+  --line: #242730;
+  --line-strong: #323643;
+  --hover: #1b1e25;
+  --text: #e8e9ed;
+  --text-muted: #9a9eab;
+  --text-subtle: #626775;
+  --accent: #ff4f00;
+  --accent-fg: #ffffff;
+  --done: #10b981;
+  --heat-0: #1b1e25;
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  --bg: #faf9f6;
+  --surface: #ffffff;
+  --line: #e5e5e0;
+  --line-strong: #d3d3cc;
+  --hover: #f2f1ec;
+  --text: #121316;
+  --text-muted: #585b63;
+  --text-subtle: #8f929a;
+  --accent: #ff4f00;
+  --accent-fg: #ffffff;
+  --done: #0e9f6e;
+  --heat-0: #ecebe6;
+  color-scheme: light;
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer components {
+  .num {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Theme switch: chỉ đổi màu, không chuyển động */
+html.theme-anim,
+html.theme-anim * {
+  transition: background-color 160ms ease-out, border-color 160ms ease-out, color 160ms ease-out !important;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+@layer base {
+  input,
+  select,
+  textarea,
+  button {
+    font: inherit;
+    color: inherit;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--text-subtle);
+  }
+}
+
+@layer components {
+  .field {
+    height: 32px;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    border-radius: 4px;
+    padding: 0 8px;
+    font-size: 13px;
+  }
+  .field:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+    border-color: transparent;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  html.theme-anim * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
